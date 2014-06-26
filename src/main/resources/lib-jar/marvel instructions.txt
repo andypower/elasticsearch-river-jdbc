@@ -1,0 +1,4 @@
+1) From the Elasticsearch home directory, run bin/plugin -i elasticsearch/marvel/latest
+2) Replace the existing marvel-1.2.1.jar from this dir to the elasticsearch/plugins/marver folder
+3) Stop & Start Elasticsearch
+4) Now use your browser to navigate to http://any-server-in-cluster:9200/_plugin/marvel/
