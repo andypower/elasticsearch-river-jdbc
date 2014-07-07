@@ -46,23 +46,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.collect.Lists;
-import org.elasticsearch.common.collect.Maps;
-import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
+import org.xbib.elasticsearch.river.jdbc.strategy.LocationFinder;
 
 /**
  * Simple river source.
@@ -93,6 +85,8 @@ public class SimpleRiverSource implements RiverSource {
     protected Connection writeConnection;
 
     protected Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+
+    private LocationFinder locationFinder;
 
     static {
         String geonameServerAddress = readProperties().getProperty("geonameServerAddress");
@@ -679,33 +673,6 @@ public class SimpleRiverSource implements RiverSource {
         listener.end();
     }
 
-    /**
-     *
-     * @param lon
-     * @param lat
-     * @return Shift the lon lat using a random distance between 1Km
-     */
-    private GeoPoint shiftLonLatPoint(double lat, double lon) {
-        //Earth’s radius, sphere
-        final double earthRadius = 6378137;
-        //offsets in meters
-        Random rand = new Random();
-        double dn = (rand.nextDouble() - 0.5d) * 2000; //Returns a number between [-1000, 1000]
-        double de = (rand.nextDouble() - 0.5d) * 2000;
-//        final double dn = rand.nextInt(1001);
-//        final double de = rand.nextInt(1001);
-//        lon += rand.nextDouble() * 0.001;
-//        lat += rand.nextDouble() * 0.001;
-        //Coordinate offsets in radians             
-        final double dLat = dn / earthRadius;
-        final double dLon = de / (earthRadius * Math.cos(Math.PI * lat / 180));
-        //OffsetPosition, decimal degrees
-        final double latO = lat + dLat * 180 / Math.PI;
-        final double lonO = lon + dLon * 180 / Math.PI;
-        return new GeoPoint(latO, lonO);
-//        return new GeoPoint(lat, lon);
-    }
-
     private void analyzeColumnLabel(List<Object> values, Object value, String columnLabel,
             ResultSet result) throws SQLException {
         if (logger().isTraceEnabled()) {
@@ -713,28 +680,10 @@ public class SimpleRiverSource implements RiverSource {
         }
         if (!columnLabel.equals("immagine")) {
             values.add(value);
-            if (columnLabel.equals("nazione")) {
-//                // instance a json mapper
-//                ObjectMapper mapper = new ObjectMapper(); // create once, reuse
-//                Location location = new Location();
-//                if (value != null) {
-//                    location.setAddress(value.toString());
-//                }
-//                location.setLocation(new GeoPoint(14, 45));
-//                // generate json
-//                values.add(Lists.newArrayList(mapper.writeValueAsString(location)));
-                Map<String, Object> json = Maps.<String, Object>newHashMap();
-                json.put("address", value);
-                if (value != null) {
-                    SearchHit[] docs = this.executeGeoNameQuery(value);
-                    if (docs.length != 0) {
-                        logger().info("Found location={}", docs[0].getSourceAsString());
-                        double longitude = Double.parseDouble(docs[0].getSource().get("longitude").toString());
-                        double latitude = Double.parseDouble(docs[0].getSource().get("latitude").toString());
-                        json.put("location", this.shiftLonLatPoint(latitude, longitude));
-                    }
-                }
-                values.add(Lists.newArrayList(json));
+            //TODO: L'ordine di inserimento dei campi ed id_area_tematica possono essere un problema?
+            if (columnLabel.equals("nazione") || columnLabel.equals("citta")
+                    || columnLabel.equals("id_area_tematica")) {
+                this.locationFinder.analyzeLocation(columnLabel, value, values);
             }
         } else if (value != null && Strings.hasLength(result.getString("nomefile"))) {
 
@@ -777,41 +726,6 @@ public class SimpleRiverSource implements RiverSource {
         } else {
             values.add(value);
         }
-    }
-
-    private SearchHit[] executeGeoNameQuery(Object value) {
-        SearchResponse response = client.prepareSearch("geonames").setSearchType(
-                SearchType.DFS_QUERY_THEN_FETCH).setQuery(
-                        QueryBuilders.filteredQuery(
-                                QueryBuilders.matchQuery("name", value),
-                                //                                        termQuery(
-                                //                                        commonTerms(
-                                //                                        matchQuery(
-                                //                                        fieldQuery("name", value),
-                                FilterBuilders.termFilter("type", "country")))
-                .setFrom(0).setSize(1).setExplain(true).execute().actionGet();
-
-        SearchHit[] docs = response.getHits().getHits();
-        if (docs.length == 0) {
-            response = client.prepareSearch("geonames").setSearchType(
-                    SearchType.DFS_QUERY_THEN_FETCH).setQuery(
-                            QueryBuilders.filteredQuery(
-                                    QueryBuilders.fuzzyQuery("name", value),
-                                    FilterBuilders.termFilter("type", "country")))
-                    .setFrom(0).setSize(1).setExplain(true).execute().actionGet();
-            docs = response.getHits().getHits();
-        }
-        if (docs.length == 0) {
-            response = client.prepareSearch("geonames").setSearchType(
-                    SearchType.DFS_QUERY_THEN_FETCH).setQuery(
-                            QueryBuilders.filteredQuery(
-                                    QueryBuilders.moreLikeThisFieldQuery("name").
-                                    likeText((String) value),
-                                    FilterBuilders.termFilter("type", "country")))
-                    .setFrom(0).setSize(1).setExplain(true).execute().actionGet();
-            docs = response.getHits().getHits();
-        }
-        return docs;
     }
 
     @SuppressWarnings({"unchecked"})
