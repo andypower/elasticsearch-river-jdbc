@@ -736,6 +736,7 @@ public class SimpleRiverSource implements RiverSource {
         ResultSetMetaData metadata = results.getMetaData();
         int columns = metadata.getColumnCount();
         context.getLastRow().clear();
+        this.locationFinder = new LocationFinder(client);
         for (int i = 1; i <= columns; i++) {
             try {
                 Object value = parseType(results, i, metadata.getColumnType(i), locale);
