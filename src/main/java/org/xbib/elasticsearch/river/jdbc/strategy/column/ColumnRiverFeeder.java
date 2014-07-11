@@ -5,8 +5,6 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.support.XContentMapValues;
-import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
