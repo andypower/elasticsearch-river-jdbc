@@ -127,6 +127,11 @@ public class RiverContext {
     private String columnDeletedAt;
 
     /**
+     * Contains overlap value for last run timestamp.
+     */
+    private TimeValue lastRunTimeStampOverlap;
+
+    /**
      * Columns name should be automatically escaped by proper db quote mark or not (for column strategy)
      */
     private boolean columnEscape;
@@ -338,7 +343,7 @@ public class RiverContext {
         return this;
     }
 
-    public Map<String,Object> getLastRow() {
+    public Map<String, Object> getLastRow() {
         return lastRow;
     }
 
@@ -347,7 +352,7 @@ public class RiverContext {
         return this;
     }
 
-    public Map<String,Object> getLastResultSetMetadata() {
+    public Map<String, Object> getLastResultSetMetadata() {
         return lastResultSetMetadata;
     }
 
@@ -356,7 +361,7 @@ public class RiverContext {
         return this;
     }
 
-    public Map<String,Object> getLastDatabaseMetadata() {
+    public Map<String, Object> getLastDatabaseMetadata() {
         return lastDatabaseMetadata;
     }
 
@@ -434,6 +439,15 @@ public class RiverContext {
 
     public boolean columnEscape() {
         return this.columnEscape;
+    }
+
+    public TimeValue getLastRunTimeStampOverlap() {
+        return lastRunTimeStampOverlap;
+    }
+
+    public RiverContext setLastRunTimeStampOverlap(TimeValue lastRunTimeStampOverlap) {
+        this.lastRunTimeStampOverlap = lastRunTimeStampOverlap;
+        return this;
     }
 
     public RiverContext contextualize() {

@@ -9,6 +9,8 @@ import org.elasticsearch.common.xcontent.support.XContentMapValues;
 import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.support.XContentMapValues;
+import org.elasticsearch.indices.IndexMissingException;
 import org.xbib.elasticsearch.action.river.state.RiverState;
 import org.xbib.elasticsearch.plugin.feeder.jdbc.JDBCFeeder;
 import org.xbib.pipeline.Pipeline;
@@ -44,11 +46,14 @@ public class ColumnRiverFeeder<T, R extends PipelineRequest, P extends Pipeline<
         String columnUpdatedAt = XContentMapValues.nodeStringValue(mySettings.get("updated_at"), "updated_at");
         String columnDeletedAt = XContentMapValues.nodeStringValue(mySettings.get("deleted_at"), null);
         boolean columnEscape = XContentMapValues.nodeBooleanValue(mySettings.get("column_escape"), true);
+        TimeValue lastRunTimeStampOverlap = XContentMapValues.nodeTimeValue(mySettings.get("last_run_timestamp_overlap"),
+                TimeValue.timeValueSeconds(0));
         riverContext
                 .columnCreatedAt(columnCreatedAt)
                 .columnUpdatedAt(columnUpdatedAt)
                 .columnDeletedAt(columnDeletedAt)
-                .columnEscape(columnEscape);
+                .columnEscape(columnEscape)
+                .setLastRunTimeStampOverlap(lastRunTimeStampOverlap);
         if (!ingest.client().admin().indices().prepareExists(defaultIndex).execute().actionGet().isExists()) {
             CreateIndexRequestBuilder builder = this.getClient().admin().indices().prepareCreate(defaultIndex);
             if (Strings.hasLength(settings.toString())) {
