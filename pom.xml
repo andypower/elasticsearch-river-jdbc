@@ -7,7 +7,7 @@
 
     <groupId>org.xbib.elasticsearch.plugin</groupId>
     <artifactId>elasticsearch-river-jdbc</artifactId>
-    <version>1.2.1.1</version>
+    <version>1.2.2.0</version>
 
     <packaging>jar</packaging>
 
@@ -73,8 +73,8 @@
         <github.global.server>github</github.global.server>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.compile.version>1.7</java.compile.version>
-        <elasticsearch.version>1.2.1</elasticsearch.version>
-        <org.xbib.elasticsearch.support.version>1.2.1.0</org.xbib.elasticsearch.support.version>
+        <elasticsearch.version>1.2.2</elasticsearch.version>
+        <org.xbib.elasticsearch.support.version>1.2.2.0</org.xbib.elasticsearch.support.version>
     </properties>
 
     <dependencies>
@@ -107,22 +107,6 @@
             <version>1.1</version>
             <type>jar</type>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.2</version>
-            <type>jar</type>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.2</version>
-            <type>jar</type>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -335,6 +319,23 @@
                             <skipTests>false</skipTests>
                             <suiteXmlFiles>
                                 <suiteXmlFile>${basedir}/src/test/resources/testsuite/support/support.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>test-plugin</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>${basedir}/src/test/resources/testsuite/plugin/plugin.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>
