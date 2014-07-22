@@ -5,7 +5,7 @@ PUT /_river/integro_jdbc_river/_meta
         "driver":"com.microsoft.sqlserver.jdbc.SQLServerDriver",
         "url":"jdbc:sqlserver://150.145.133.53:1433;databaseName=OSINT",
         "user":"integrousr","password":"Integrop4ss",
-        "sql":"select ossum.id AS _id, ossum.id AS idES, data, ossum.id_nazione,  NAZIONI.NOME AS nazione, citta, infrastrutture, id_area_tematica, id_redattore, titolo, testo, id_fonte, lunghezza, ossum.content_type, stampa, nomefile, immagine, data,  data_modifica, origine from ossum LEFT OUTER JOIN NAZIONI ON ossum.id_nazione = NAZIONI.ID_NAZIONE",
+        "sql":"select ossum.id AS _id, ossum.id AS idES, data, ossum.id_nazione,  NAZIONI.NOME AS nazione, citta, infrastruttura, id_area_tematica, id_redattore, titolo, testo, id_fonte, lunghezza, ossum.content_type, stampa, nomefile, immagine, data,  data_modifica, origine from ossum LEFT OUTER JOIN NAZIONI ON ossum.id_nazione = NAZIONI.ID_NAZIONE",
         "index" : "geonews",
         "strategy" : "column",
         "created_at" :"data",
