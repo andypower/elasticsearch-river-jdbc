@@ -58,27 +58,36 @@ public class LocationFinder {
      * @param values
      */
     public void analyzeLocation(String columnLabel, Object value, List<Object> values) {
-        if (columnLabel.equals("nazione")) {
-            this.jsonLocation = this.findCountry(value);
-        } else if (columnLabel.equals("citta")) {
-            Map<String, Object> cityAddress = this.findCity(value);
-            if (cityAddress.get("location") != null) {
-                this.jsonLocation = cityAddress;
-            }
-        } else if (columnLabel.equals("id_area_tematica")) {
-            //Adds the country or the city found
-            values.add(Lists.newArrayList(jsonLocation));
-            //We need to add the id_area_tematica?? values.add(value);
+        logger.debug("Column Label: {}", columnLabel);
+        switch (columnLabel) {
+            case "nazione":
+                this.jsonLocation = this.findCountry(value);
+                logger.debug("Trovata nazione: {}", this.jsonLocation);
+                break;
+            case "citta":
+                Map<String, Object> cityAddress = this.findCity(value);
+                if (cityAddress.get("location") != null) {
+                    this.jsonLocation = cityAddress;
+                    logger.debug("Trovata citta: {}", this.jsonLocation);
+                }
+                ;
+                break;
+            case "id_area_tematica":
+                //Adds the country or the city found
+                values.add(Lists.newArrayList(jsonLocation));
+                logger.debug("Aggiunta location: {}", this.jsonLocation);
+                logger.debug("Lista di valori: {}", values);
+                break;
         }
     }
 
     private Map<String, Object> findCity(Object value) {
         Map<String, Object> json = Maps.<String, Object>newHashMap();
         json.put("address", value);
-        if (value != null) {
+        if (value != null && !((String)value).isEmpty()) {
             SearchHit[] docs = this.executeCityGeoNameQuery(value);
             if (docs.length != 0) {
-                logger.info("Found city={}", docs[0].getSourceAsString());
+                logger.debug("!!! Found city={}", docs[0].getSourceAsString());
                 double longitude = Double.parseDouble(docs[0].getSource().get("longitude").toString());
                 double latitude = Double.parseDouble(docs[0].getSource().get("latitude").toString());
                 json.put("location", this.shiftLonLatPoint(latitude, longitude));
@@ -90,10 +99,10 @@ public class LocationFinder {
     private Map<String, Object> findCountry(Object value) {
         Map<String, Object> json = Maps.<String, Object>newHashMap();
         json.put("address", value);
-        if (value != null) {
+        if (value != null && !((String)value).isEmpty()) {
             SearchHit[] docs = this.executeCountryGeoNameQuery(value);
             if (docs.length != 0) {
-                logger.info("Found country={}", docs[0].getSourceAsString());
+                logger.debug("!!! Found country={}", docs[0].getSourceAsString());
                 double longitude = Double.parseDouble(docs[0].getSource().get("longitude").toString());
                 double latitude = Double.parseDouble(docs[0].getSource().get("latitude").toString());
                 this.countryGeonameID = docs[0].getSource().get("geonameid").toString();
@@ -105,8 +114,9 @@ public class LocationFinder {
 
     private SearchHit[] executeCityGeoNameQuery(Object value) {
         FilterBuilder typeCityFilter = null;
-        if (Strings.hasLength(countryGeonameID)) {
-            typeCityFilter = FilterBuilders.andFilter(FilterBuilders.idsFilter(countryGeonameID),
+        if (Strings.hasText(countryGeonameID)) {
+            typeCityFilter = FilterBuilders.andFilter(
+                    FilterBuilders.termFilter("parents.geonameid", countryGeonameID),
                     FilterBuilders.termFilter("type", "city"));
         } else {
             typeCityFilter = FilterBuilders.termFilter("type", "city");

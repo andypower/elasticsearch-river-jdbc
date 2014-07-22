@@ -59,9 +59,8 @@ import org.xbib.elasticsearch.river.jdbc.strategy.LocationFinder;
 /**
  * Simple river source.
  * <p/>
- * The simple river source iterates through a JDBC result set,
- * merges the rows into Elasticsearch documents, and passes them to
- * a bulk indexer.
+ * The simple river source iterates through a JDBC result set, merges the rows
+ * into Elasticsearch documents, and passes them to a bulk indexer.
  * <p/>
  * There are two channels open, one for reading the database, one for writing.
  */
@@ -266,7 +265,7 @@ public class SimpleRiverSource implements RiverSource {
      * River cycle fetch. Issue a series of SQL statements.
      *
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     public void fetch() throws SQLException, IOException {
@@ -309,7 +308,7 @@ public class SimpleRiverSource implements RiverSource {
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void execute(SQLCommand command) throws Exception {
         Statement statement = null;
@@ -350,7 +349,7 @@ public class SimpleRiverSource implements RiverSource {
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void executeWithParameter(SQLCommand command) throws Exception {
         PreparedStatement statement = null;
@@ -380,7 +379,7 @@ public class SimpleRiverSource implements RiverSource {
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void executeCallable(SQLCommand command) throws Exception {
         // call stored procedure
@@ -416,10 +415,10 @@ public class SimpleRiverSource implements RiverSource {
     /**
      * Merge key/values from JDBC result set
      *
-     * @param results  result set
+     * @param results result set
      * @param listener the value listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     public void merge(ResultSet results, KeyValueStreamListener listener)
             throws SQLException, IOException, ParseException {
@@ -446,9 +445,9 @@ public class SimpleRiverSource implements RiverSource {
      * Merge key/values from registered params of a callable statement
      *
      * @param statement callable statement
-     * @param listener  the value listener
+     * @param listener the value listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @SuppressWarnings({"unchecked"})
     public void merge(CallableStatement statement, SQLCommand command, KeyValueStreamListener listener)
@@ -483,13 +482,13 @@ public class SimpleRiverSource implements RiverSource {
             throw new SQLException("can't connect to source " + url);
         }
         logger().debug("preparing statement with SQL {}", sql);
-        int type =
-                "TYPE_FORWARD_ONLY".equals(context.getResultSetType()) ? ResultSet.TYPE_FORWARD_ONLY :
-                        "TYPE_SCROLL_SENSITIVE".equals(context.getResultSetType()) ? ResultSet.TYPE_SCROLL_SENSITIVE :
-                                "TYPE_SCROLL_INSENSITIVE".equals(context.getResultSetType()) ? ResultSet.TYPE_SCROLL_INSENSITIVE :
-                                        ResultSet.TYPE_FORWARD_ONLY;
-        int concurrency = "CONCUR_READ_ONLY".equals(context.getResultSetConcurrency()) ?
-                ResultSet.CONCUR_READ_ONLY : ResultSet.CONCUR_UPDATABLE;
+        int type
+                = "TYPE_FORWARD_ONLY".equals(context.getResultSetType()) ? ResultSet.TYPE_FORWARD_ONLY
+                : "TYPE_SCROLL_SENSITIVE".equals(context.getResultSetType()) ? ResultSet.TYPE_SCROLL_SENSITIVE
+                : "TYPE_SCROLL_INSENSITIVE".equals(context.getResultSetType()) ? ResultSet.TYPE_SCROLL_INSENSITIVE
+                : ResultSet.TYPE_FORWARD_ONLY;
+        int concurrency = "CONCUR_READ_ONLY".equals(context.getResultSetConcurrency())
+                ? ResultSet.CONCUR_READ_ONLY : ResultSet.CONCUR_UPDATABLE;
         return connection.prepareStatement(sql, type, concurrency);
     }
 
@@ -513,7 +512,7 @@ public class SimpleRiverSource implements RiverSource {
      * Bind values to prepared statement
      *
      * @param statement the prepared statement
-     * @param values    the values to bind
+     * @param values the values to bind
      * @throws SQLException when SQL execution gives an error
      */
     @Override
@@ -532,7 +531,7 @@ public class SimpleRiverSource implements RiverSource {
      * Register variables in callable statement
      *
      * @param statement callable statement
-     * @param values    values
+     * @param values values
      * @return this river source
      * @throws SQLException when SQL execution gives an error
      */
@@ -570,7 +569,7 @@ public class SimpleRiverSource implements RiverSource {
      * Execute query statement
      *
      * @param statement the statement
-     * @param sql       the SQL
+     * @param sql the SQL
      * @return the result set
      * @throws SQLException when SQL execution gives an error
      */
@@ -616,10 +615,10 @@ public class SimpleRiverSource implements RiverSource {
     /**
      * Before rows are read, let the KeyValueStreamListener know about the keys.
      *
-     * @param results  the result set
+     * @param results the result set
      * @param listener the key/value stream listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     @SuppressWarnings({"unchecked"})
@@ -630,9 +629,9 @@ public class SimpleRiverSource implements RiverSource {
         List<String> keys = new LinkedList();
         for (int i = 1; i <= columns; i++) {
             keys.add(metadata.getColumnLabel(i));
-            if (metadata.getColumnLabel(i).equals("nazione")) {
+            if (metadata.getColumnLabel(i).equals("id_area_tematica")) {
                 keys.add("locations");
-        }
+            }
         }
         keys.add("validated");
         listener.begin();
@@ -643,11 +642,11 @@ public class SimpleRiverSource implements RiverSource {
      * Get next row and prepare the values for processing. The labels of each
      * columns are used for the ValueListener as paths for JSON object merging.
      *
-     * @param results  the result set
+     * @param results the result set
      * @param listener the listener
      * @return true if row exists and was processed, false otherwise
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     public boolean nextRow(ResultSet results, KeyValueStreamListener listener)
@@ -663,10 +662,10 @@ public class SimpleRiverSource implements RiverSource {
      * After the rows keys and values, let the listener know about the end of
      * the result set.
      *
-     * @param results  the result set
+     * @param results the result set
      * @param listener the key/value stream listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     public void afterRows(ResultSet results, KeyValueStreamListener listener)
@@ -680,9 +679,11 @@ public class SimpleRiverSource implements RiverSource {
             logger().trace("value={} class={}", value, value != null ? value.getClass().getName() : "");
         }
         if (!columnLabel.equals("immagine")) {
+            logger.debug("Added value: {} for columnLabel: {}", value, columnLabel);
             values.add(value);
             //TODO: L'ordine di inserimento dei campi ed id_area_tematica possono essere un problema?
             if (columnLabel.equals("nazione") || columnLabel.equals("citta")
+//                    || columnLabel.equals("infrastruttura")
                     || columnLabel.equals("id_area_tematica")) {
                 this.locationFinder.analyzeLocation(columnLabel, value, values);
             }
@@ -886,7 +887,6 @@ public class SimpleRiverSource implements RiverSource {
         context.setLastDatabaseMetadata(m);
     }
 
-
     private void prepare(final ResultSetMetaData metaData) throws SQLException {
         Map<String, Object> m = new HashMap<String, Object>() {
             {
@@ -944,29 +944,29 @@ public class SimpleRiverSource implements RiverSource {
                 statement.setLong(i, context.getLastRowCount());
             } else if ("$last.sql.start".equals(s)) {
                 if (context.getLastExecutionStartDate() == 0L) {
-                    Timestamp riverStarted = context.getRiverFlow() != null ?
-                            new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
+                    Timestamp riverStarted = context.getRiverFlow() != null
+                            ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
                     context.setLastExecutionStartDate(riverStarted != null ? riverStarted.getTime() : new java.util.Date().getTime());
                 }
                 statement.setTimestamp(i, new Timestamp(context.getLastExecutionStartDate()), calendar);
             } else if ("$last.sql.end".equals(s)) {
                 if (context.getLastExecutionEndDate() == 0L) {
-                    Timestamp riverStarted = context.getRiverFlow() != null ?
-                            new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
+                    Timestamp riverStarted = context.getRiverFlow() != null
+                            ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
                     context.setLastExecutionEndDate(riverStarted != null ? riverStarted.getTime() : new java.util.Date().getTime());
                 }
                 statement.setTimestamp(i, new Timestamp(context.getLastExecutionEndDate()), calendar);
             } else if ("$last.sql.sequence.start".equals(s)) {
                 if (context.getLastStartDate() == 0L) {
-                    Timestamp riverStarted = context.getRiverFlow() != null ?
-                            new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
+                    Timestamp riverStarted = context.getRiverFlow() != null
+                            ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
                     context.setLastStartDate(riverStarted != null ? riverStarted.getTime() : new java.util.Date().getTime());
                 }
                 statement.setTimestamp(i, new Timestamp(context.getLastStartDate()), calendar);
             } else if ("$last.sql.sequence.end".equals(s)) {
                 if (context.getLastEndDate() == 0L) {
-                    Timestamp riverStarted = context.getRiverFlow() != null ?
-                            new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
+                    Timestamp riverStarted = context.getRiverFlow() != null
+                            ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
                     context.setLastEndDate(riverStarted != null ? riverStarted.getTime() : new java.util.Date().getTime());
                 }
                 statement.setTimestamp(i, new Timestamp(context.getLastEndDate()), calendar);
@@ -974,16 +974,16 @@ public class SimpleRiverSource implements RiverSource {
                 String name = context.getRiverName();
                 statement.setString(i, name);
             } else if ("$river.state.timestamp".equals(s)) {
-                Timestamp timestamp = context.getRiverFlow() != null ?
-                        new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getTimestamp().getTime()) : null;
+                Timestamp timestamp = context.getRiverFlow() != null
+                        ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getTimestamp().getTime()) : null;
                 statement.setTimestamp(i, timestamp, calendar);
             } else if ("$river.state.started".equals(s)) {
-                Timestamp started = context.getRiverFlow() != null ?
-                        new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
+                Timestamp started = context.getRiverFlow() != null
+                        ? new Timestamp(context.getRiverFlow().getFeeder().getRiverState().getStarted().getTime()) : null;
                 statement.setTimestamp(i, started, calendar);
             } else if ("$river.state.counter".equals(s)) {
-                Long counter = context.getRiverFlow() != null ?
-                        context.getRiverFlow().getFeeder().getRiverState().getCounter() : null;
+                Long counter = context.getRiverFlow() != null
+                        ? context.getRiverFlow().getFeeder().getRiverState().getCounter() : null;
                 if (counter != null) {
                     statement.setLong(i, counter);
                 }
@@ -1034,12 +1034,12 @@ public class SimpleRiverSource implements RiverSource {
      * Parse of value of result set
      *
      * @param result the result set
-     * @param i      the offset in the result set
-     * @param type   the JDBC type
+     * @param i the offset in the result set
+     * @param type the JDBC type
      * @param locale the locale to use for parsing
      * @return The parse value
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     public Object parseType(ResultSet result, Integer i, int type, Locale locale)
